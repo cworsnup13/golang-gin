@@ -72,10 +72,28 @@ class App extends React.Component {
 class Home extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {value: 'What\'s the magic word??'};
+    this.handleChange = this.handleChange.bind(this);
     this.authenticate = this.authenticate.bind(this);
   }
 
+  handleChange(event) {
+    this.setState({value: event.target.value});
+  }
+
+  check_password(trial) {
+    if (trial === "YES") {
+      return true;
+    }
+    return false;
+  }
+
   authenticate() {
+    if (!this.check_password(this.state.value)){
+      alert("Sorry incorrect password");
+      return;
+    }
+
     this.WebAuth = new auth0.WebAuth({
       domain: AUTH0_DOMAIN,
       clientID: AUTH0_CLIENT_ID,
@@ -89,12 +107,14 @@ class Home extends React.Component {
 
   render() {
     return (
-      <div className="container">
+      <div className="calvin-container container">
         <div className="row">
-          <div className="col-xs-8 col-xs-offset-2 jumbotron text-center">
-            <h1>Jokeish</h1>
-            <p>A load of Dad jokes XD</p>
-            <p>Sign in to get access </p>
+          <div className="col-xs-8 col-xs-offset-2 text-center">
+            <img src="/static/img/candle.gif"></img>
+            <p className="welcome-prompt">Calvin and Karrisa's wedding</p>
+            <textarea value={this.state.value} onChange={this.handleChange}>
+              What's the magic word??
+            </textarea>
             <a
               onClick={this.authenticate}
               className="btn btn-primary btn-lg btn-login btn-block"
@@ -176,7 +196,7 @@ class Joke extends React.Component {
 
   serverRequest(joke) {
     $.post(
-      "http://localhost:3000/api/jokes/like/" + joke.id,
+      AUTH0_API_AUDIENCE + "/api/jokes/like/" + joke.id,
       {like: 1},
       res => {
         console.log("res... ", res);
