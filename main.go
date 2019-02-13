@@ -46,8 +46,8 @@ var jokes = []Joke{
 }
 var jwtMiddleWare *jwtmiddleware.JWTMiddleware
 
-func main() {
-	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
+func setupMiddleware() *jwtmiddleware.JWTMiddleware {
+	j := jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
 			aud := os.Getenv("AUTH0_API_AUDIENCE")
 			checkAudience := token.Claims.(jwt.MapClaims).VerifyAudience(aud, false)
@@ -56,11 +56,8 @@ func main() {
 			}
 			// verify iss claim
 			iss := os.Getenv("AUTH0_DOMAIN")
-			fmt.Println(iss)
-			fmt.Printf("%v\n", token)
 			checkIss := token.Claims.(jwt.MapClaims).VerifyIssuer(iss, false)
 			if !checkIss {
-				fmt.Println("Error 2")
 				return token, errors.New("Invalid issuer.")
 			}
 			cert, err := getPemCert(token)
@@ -72,8 +69,10 @@ func main() {
 		},
 		SigningMethod: jwt.SigningMethodRS256,
 	})
-	jwtMiddleWare = jwtMiddleware
-	// Set the router as the default one shipped with Gin
+	return j
+}
+
+func setupRouter() *gin.Engine {
 	router := gin.Default()
 	// Serve the frontend
 	router.Use(static.Serve("/", static.LocalFile("./views", true)))
@@ -87,9 +86,9 @@ func main() {
 		api.GET("/jokes", authMiddleware(), JokeHandler)
 		api.POST("/jokes/like/:jokeID", authMiddleware(), LikeJoke)
 	}
-	// Start the app
-	router.Run(":3000")
+	return router
 }
+
 func getPemCert(token *jwt.Token) (string, error) {
 	cert := ""
 	resp, err := http.Get(os.Getenv("AUTH0_DOMAIN") + ".well-known/jwks.json")
@@ -122,7 +121,6 @@ func authMiddleware() gin.HandlerFunc {
 		if err != nil {
 			// Token not found
 			fmt.Println(err)
-			fmt.Println("Error 1")
 			c.Abort()
 			c.Writer.WriteHeader(http.StatusUnauthorized)
 			c.Writer.Write([]byte("Unauthorized"))
@@ -136,6 +134,7 @@ func JokeHandler(c *gin.Context) {
 	c.Header("Content-Type", "application/json")
 	c.JSON(http.StatusOK, jokes)
 }
+
 func LikeJoke(c *gin.Context) {
 	// Check joke ID is valid
 	if jokeid, err := strconv.Atoi(c.Param("jokeID")); err == nil {
@@ -150,4 +149,20 @@ func LikeJoke(c *gin.Context) {
 		// the jokes ID is invalid
 		c.AbortWithStatus(http.StatusNotFound)
 	}
+}
+
+func main() {
+	var err error
+	// setup global var middleware
+	jwtMiddleWare = setupMiddleware()
+
+	// Set the router as the default one shipped with Gin
+	router := setupRouter()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// Start the app
+	router.Run(":3000")
 }
