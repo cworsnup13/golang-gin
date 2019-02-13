@@ -60,7 +60,7 @@ func setupMiddleware() *jwtmiddleware.JWTMiddleware {
 func setupRouter() *gin.Engine {
 	router := gin.Default()
 	// Serve the frontend
-	router.Use(static.Serve("/", static.LocalFile("./views", true)))
+	router.Use(static.Serve("/", static.LocalFile("./static", true)))
 	router.Use(static.Serve("/static", static.LocalFile("./static", true)))
 	api := router.Group("/api")
 	{
