@@ -34,6 +34,7 @@ var jwtMiddleWare *jwtmiddleware.JWTMiddleware
 func setupMiddleware() *jwtmiddleware.JWTMiddleware {
 	j := jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+			fmt.Printf("%v\n", token)
 			aud := os.Getenv("AUTH0_API_AUDIENCE")
 			checkAudience := token.Claims.(jwt.MapClaims).VerifyAudience(aud, false)
 			if !checkAudience {

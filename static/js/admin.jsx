@@ -2,6 +2,7 @@ const AUTH0_CLIENT_ID = "j4zdupDcq4lJPU2tJ9AfeypYwMyu7dIw"
 const AUTH0_DOMAIN = "dev-bh3jb8sq.auth0.com"
 const AUTH0_CALLBACK_URL = location.href;
 const AUTH0_API_AUDIENCE = "https://calvinandkarrisa.com"
+var ALLOWED_USERS = ["calvin.worsnup", "karrisa.m.alcera"]
 
 
 class App extends React.Component {
@@ -14,6 +15,7 @@ class App extends React.Component {
       if (err) {
         return console.log(err);
       }
+
       if (
         authResult !== null &&
         authResult.accessToken !== null &&
@@ -29,11 +31,10 @@ class App extends React.Component {
           0,
           window.location.href.indexOf("#")
         );
-        console.log(localStorage);
       }
     });
   }
-
+//JSON.parse(this.localStorage.profile)["nickname"] contains
   setup() {
     $.ajaxSetup({
       beforeSend: (r) => {
@@ -45,6 +46,15 @@ class App extends React.Component {
         }
       }
     });
+  }
+
+  checkAllowedUsers(){
+    var nickname = JSON.parse(localStorage.profile)["nickname"];
+
+    if (ALLOWED_USERS.includes(nickname)){
+      return true;
+    }
+    return false;
   }
 
   setState() {
@@ -63,7 +73,8 @@ class App extends React.Component {
   }
 
   render() {
-    if (this.loggedIn) {
+    var allowed = this.checkAllowedUsers();
+    if (this.loggedIn && allowed) {
       return <LoggedIn/>;
     }
     return <Home/>;
