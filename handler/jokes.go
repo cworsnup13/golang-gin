@@ -23,11 +23,22 @@ var jokes = []Joke{
 	Joke{7, 0, "How does a penguin build it's house? Igloos it together."},
 }
 
+type PasswordCorrect struct {
+	Valid bool `json:"valid"`
+}
+
 // JokeHandler returns a list of jokes available (in memory)
 func JokeHandler(c *gin.Context) {
 	c.Header("Content-Type", "application/json")
 	c.JSON(http.StatusOK, jokes)
 }
+
+func PasswordHandler(c *gin.Context) {
+	c.Header("Content-Type", "application/json")
+	c.JSON(http.StatusOK, PasswordCorrect{true})
+}
+
+
 
 func LikeJoke(c *gin.Context) {
 	// Check joke ID is valid

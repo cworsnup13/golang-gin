@@ -63,6 +63,7 @@ func setupRouter() *gin.Engine {
 	// Serve the frontend
 	router.Use(static.Serve("/", static.LocalFile("./static", true)))
 	router.Use(static.Serve("/static", static.LocalFile("./static", true)))
+
 	api := router.Group("/api")
 	{
 		api.GET("/", func(c *gin.Context) {
@@ -70,6 +71,7 @@ func setupRouter() *gin.Engine {
 				"message": "pong",
 			})
 		})
+		api.POST("/password", handler.PasswordHandler)
 		api.GET("/jokes", authMiddleware(), handler.JokeHandler)
 		api.POST("/jokes/like/:jokeID", authMiddleware(), handler.LikeJoke)
 	}

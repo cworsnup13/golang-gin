@@ -49,7 +49,10 @@ class App extends React.Component {
   }
 
   checkAllowedUsers(){
-    var nickname = JSON.parse(localStorage.profile)["nickname"];
+    var nickname = "";
+    if (localStorage.profile){
+      nickname = JSON.parse(localStorage.profile)["nickname"];
+    }
 
     if (ALLOWED_USERS.includes(nickname)){
       return true;
