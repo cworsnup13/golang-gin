@@ -31,7 +31,12 @@ class App extends React.Component {
 class Home extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {value: 'What\'s the magic word??', valid: false};
+    this.state = {
+      value: 'What\'s the magic word??',
+      password: "",
+      valid: false,
+      guestType: "",
+    };
     this.handleChange = this.handleChange.bind(this);
     this.authenticate = this.authenticate.bind(this);
     this.check_password = this.check_password.bind(this);
@@ -39,6 +44,10 @@ class Home extends React.Component {
 
   handleChange(event) {
     this.setState({value: event.target.value});
+  }
+
+  authenticate() {
+    this.check_password(this.state.value);
   }
 
   check_password(trial) {
@@ -50,18 +59,24 @@ class Home extends React.Component {
         this.setState({
           valid: res.valid
         });
-      }
-    );
+        this.setState({
+          guestType: res.guestType
+        });
+        this.setState({
+          password: trial
+        });
+        this.post_attempt();
+      },
+
+    ).error(function() {
+      alert("Sorry incorrect password");
+    });
   }
 
-  authenticate() {
-    this.check_password(this.state.value);
-    console.log(this.state.valid);
-    if (!this.state.valid){
-      alert("Sorry incorrect password");
-      return;
-    }
+  post_attempt() {
     localStorage.setItem("allowed", true);
+    localStorage.setItem("guestType", this.state.guestType);
+    localStorage.setItem("password", this.state.password);
     location.reload();
   }
 
@@ -88,9 +103,48 @@ class Home extends React.Component {
   }
 }
 
+class CKCalendar extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {password: localStorage.getItem("password")};
+  }
+
+  componentDidMount() {
+    $.post(
+      AUTH0_API_AUDIENCE + "/api/calendar",
+      {password: this.state.password},
+      res => {
+        console.log("res... ", res);
+        this.draw_calendar(res);
+      },
+
+    ).error(function() {
+      alert("Sorry incorrect password");
+    });
+  }
+
+  draw_calendar(event_data) {
+    $('#calendar').fullCalendar(event_data);
+  }
+
+  componentWillUnmount() {
+
+  }
+
+  render() {
+    return (
+      <div id='calendar'></div>
+    );
+  }
+}
+
 class LoggedIn extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      guestType: localStorage.getItem("guestType"),
+    };
     this.logout = this.logout.bind(this);
   }
 
@@ -111,7 +165,8 @@ class LoggedIn extends React.Component {
                 <a onClick={this.logout}>Log out</a>
               </span>
         <h2 className="welcome-prompt">Calvin and Karrisa's Wedding</h2>
-        <p className="welcome-prompt">You're in</p>
+        <p className="welcome-prompt">Welcome {this.state.guestType}</p>
+        <CKCalendar />
       </div>
     );
   }

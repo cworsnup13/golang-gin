@@ -72,6 +72,7 @@ func setupRouter() *gin.Engine {
 			})
 		})
 		api.POST("/password", handler.PasswordHandler)
+		api.POST("/calendar", handler.CalendarHandler)
 		api.GET("/jokes", authMiddleware(), handler.JokeHandler)
 		api.POST("/jokes/like/:jokeID", authMiddleware(), handler.LikeJoke)
 	}
