@@ -4,34 +4,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"fmt"
+
+	"github.com/cworsnup13/golang-gin/models"
 )
 
-const (
-	// TODO REPLACE WHEN TESTING COMPLETE
-	adminPassword        = "admin"
-	weddingPartyPassword = "party"
-	guestPassword        = "guest"
-)
-
-var GuestTypes = createGuestTypes()
-
-type GuestType struct {
-	GuestType  string `json:"guestType"`
-	Password string
-	Valid bool   `json:"valid"`
-}
-
-// createGuestTypes can create the types from a yaml.
-func createGuestTypes() []GuestType {
-	var types = make([]GuestType, 3)
-	types[0] = GuestType{"admin", adminPassword, true}
-	types[1] = GuestType{"Wedding Party", weddingPartyPassword, true}
-	types[2] = GuestType{"Wedding Guest", guestPassword, true}
-	return types
-}
-
-func CheckPassword(password string) *GuestType {
-	for _, g := range GuestTypes {
+func CheckPassword(password string) *models.GuestType {
+	for _, g := range models.GetAllGuestTypes().Types {
 		if password == g.Password {
 			return &g
 		}
